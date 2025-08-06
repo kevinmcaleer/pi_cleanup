@@ -16,14 +16,18 @@ sudo journalctl --vacuum-time=3d
 
 ### 3. Remove unused ConnMan Ethernet profiles
 echo "🌐 Removing old ConnMan Ethernet profiles..."
-ACTIVE_PROFILE=$(connmanctl services 2>/dev/null | grep ethernet | awk '{print $NF}')
-cd /var/lib/connman || exit 1
-for d in ethernet_*_cable; do
-    if [[ "$d" != "$ACTIVE_PROFILE" ]]; then
-        echo "🗑️ Deleting $d"
-        sudo rm -rf "$d"
-    fi
-done
+if [ -d /var/lib/connman ]; then
+    ACTIVE_PROFILE=$(connmanctl services 2>/dev/null | grep ethernet | awk '{print $NF}')
+    cd /var/lib/connman || exit 1
+    for d in ethernet_*_cable; do
+        if [[ "$d" != "$ACTIVE_PROFILE" ]]; then
+            echo "🗑️ Deleting $d"
+            sudo rm -rf "$d"
+        fi
+    done
+else
+    echo "ConnMan directory not found, skipping..."
+fi
 
 ### 4. Clear thumbnail cache (GUI systems)
 echo "🖼️ Clearing thumbnail cache..."
